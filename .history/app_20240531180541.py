@@ -1,6 +1,5 @@
 from flask import Flask, request
 import openai
-import os
 
 
 # Initialize Flask app
