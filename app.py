@@ -1,35 +1,29 @@
-from flask import Flask, request
-import openai
+from flask import Flask, request, jsonify
+import requests
 import os
 
-
-# Initialize Flask app
 app = Flask(__name__)
 
-# Set GPT-4o API key
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+# Gemini API key and endpoint
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_ENDPOINT = "https://api.gemini.com/v1/analyze"  # Replace with actual Gemini API endpoint
 
-# Define API endpoint for data analysis
 @app.route("/analyze", methods=["POST"])
 def analyze_data():
-    # Get data from request
-    data = request.json
-
-    # Preprocess data (if necessary)
-
-    # Use GPT-4o to generate insights
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=f"Analyze the following data: {data}",
-        max_tokens=1024,
-        n=1,
-        stop=None,
-        temperature=0.5,
+    data = request.json.get("query")
+    
+    # Call the Gemini API
+    response = requests.post(
+        GEMINI_API_ENDPOINT,
+        headers={"Authorization": "Bearer AIzaSyAGWOcLqVk7-Rbhql6We6Qp2Kc_GnslKm4"},
+        json={"query": data}
     )
+    
+    if response.status_code == 200:
+        insights = response.json().get("insights")
+        return jsonify({"insights": insights})
+    else:
+        return jsonify({"error": "Failed to fetch insights"}), response.status_code
 
-    # Return insights as JSON response
-    return jsonify({"insights": response.choices[0].text})
-
-# Run the Flask development server
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, host="0.0.0.0", port=5001)
